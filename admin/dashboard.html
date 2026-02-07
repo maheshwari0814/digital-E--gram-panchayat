@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard | Digital E-Gram Panchayat</title>
+<link rel="stylesheet" href="../css/admin-dashboard.css">
+</head>
+<body>
+
+<header class="top-header">
+    <h1>Digital E-Gram Panchayat</h1>
+    <span>Admin Dashboard</span>
+</header>
+
+<section class="admin-dashboard">
+    <h2>System Analytics</h2>
+    <p class="subtitle">Overall application statistics</p>
+    
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3 id="total">0</h3>
+            <p>Total Applications</p>
+        </div>
+
+        <div class="stat-card pending">
+            <h3 id="pending">0</h3>
+            <p>Pending</p>
+        </div>
+
+        <div class="stat-card approved">
+            <h3 id="approved">0</h3>
+            <p>Approved</p>
+        </div>
+
+        <div class="stat-card rejected">
+            <h3 id="rejected">0</h3>
+            <p>Rejected</p>
+        </div>
+    </div>
+    <div class="card">
+  <h3>Manage Services</h3>
+  <p>Create, update and delete services</p>
+  <a href="services.html">
+    <button>Open</button>
+  </a>
+  <li><a href="manage-staff.html">Manage Staff</a></li>
+
+</div>
+
+
+    <a href="../login.html" class="logout">Logout</a>
+</section>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* ADMIN ACCESS CHECK */
+auth.onAuthStateChanged(user => {
+  if(!user){
+    window.location.href = "../login.html";
+    return;
+  }
+
+  db.collection("users").doc(user.uid).get().then(doc => {
+    if(!doc.exists || doc.data().role !== "admin"){
+      alert("Access denied");
+      window.location.href = "../login.html";
+      return;
+    }
+
+    loadAnalytics();
+  });
+});
+
+/* LOAD ANALYTICS */
+function loadAnalytics(){
+  db.collection("applications").onSnapshot(snapshot => {
+    let total = snapshot.size;
+    let pending = 0;
+    let approved = 0;
+    let rejected = 0;
+
+    snapshot.forEach(doc => {
+      const status = doc.data().status;
+      if(status === "Pending") pending++;
+      else if(status === "Approved") approved++;
+      else if(status === "Rejected") rejected++;
+    });
+
+    document.getElementById("total").innerText = total;
+    document.getElementById("pending").innerText = pending;
+    document.getElementById("approved").innerText = approved;
+    document.getElementById("rejected").innerText = rejected;
+  });
+}
+</script>
+
+</body>
+</html>

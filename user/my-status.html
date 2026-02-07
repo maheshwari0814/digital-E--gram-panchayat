@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Application Status</title>
+<link rel="stylesheet" href="../css/my-status.css">
+</head>
+<body>
+
+<header class="top-header">
+    <h1>Digital E-Gram Panchayat</h1>
+    <span>My Application Status</span>
+</header>
+
+<div class="status-container">
+    <h2>My Applications</h2>
+    <div id="applications"></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+/* 🔐 Firebase Config */
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* 🔐 AUTH CHECK */
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "../login.html";
+    return;
+  }
+  loadApplications(user.uid);
+});
+
+/* 📄 LOAD USER APPLICATIONS */
+function loadApplications(uid) {
+  db.collection("applications")
+    .where("userId", "==", uid)
+    .onSnapshot(snapshot => {
+
+      const container = document.getElementById("applications");
+      container.innerHTML = "";
+
+      if(snapshot.empty){
+        container.innerHTML = "<p>No applications found.</p>";
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+
+        container.innerHTML += `
+          <div class="app-card">
+            <h3>${d.service}</h3>
+
+            <p><strong>Name:</strong> ${d.name}</p>
+            <p><strong>Mobile:</strong> ${d.mobile}</p>
+
+            <p>
+              <strong>Status:</strong>
+              <span class="status ${d.status.toLowerCase()}">
+                ${d.status}
+              </span>
+            </p>
+
+            ${d.status === "Approved" ? `
+              <button class="download-btn"
+                onclick="downloadPDF(
+                  '${d.service}',
+                  '${d.name}',
+                  '${d.mobile}',
+                  '${d.address}'
+                )">
+                Download Certificate
+              </button>
+            ` : ""}
+          </div>
+        `;
+      });
+    });
+}
+
+/* 📄 GENERATE PROFESSIONAL CERTIFICATE */
+function downloadPDF(service, name, mobile, address) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  /* BORDER */
+  pdf.setLineWidth(1.5);
+  pdf.rect(10, 10, 190, 277);
+
+  /* LOGO */
+  const logo = new Image();
+  logo.src = "../assets/gov-logo.png";   // ✅ add logo here
+
+  logo.onload = function () {
+
+    pdf.addImage(logo, "PNG", 85, 15, 40, 30);
+
+    pdf.setFont("times", "bold");
+    pdf.setFontSize(18);
+    pdf.text("DIGITAL E-GRAM PANCHAYAT", 105, 55, { align: "center" });
+
+    pdf.setFontSize(14);
+    pdf.text("Government of India", 105, 65, { align: "center" });
+
+    pdf.line(30, 70, 180, 70);
+
+    pdf.setFontSize(16);
+    pdf.text(`${service.toUpperCase()} CERTIFICATE`, 105, 85, { align: "center" });
+
+    pdf.setFont("times", "normal");
+    pdf.setFontSize(12);
+    pdf.text(
+      `This is to certify that Mr/Ms. ${name}, residing at ${address}, `
+      + `has applied for the ${service} through the Digital E-Gram Panchayat portal. `
+      + `After verification, the application has been approved.`,
+      25,
+      105,
+      { maxWidth: 160, lineHeightFactor: 1.6 }
+    );
+
+    pdf.text(`Name      : ${name}`, 25, 165);
+    pdf.text(`Mobile    : ${mobile}`, 25, 175);
+    pdf.text(`Service   : ${service}`, 25, 185);
+    pdf.text(`Status    : Approved`, 25, 195);
+    pdf.text(`Issued On : ${new Date().toLocaleDateString()}`, 25, 215);
+
+    pdf.setFont("times", "bold");
+    pdf.text("Authorized Officer", 140, 235);
+    pdf.line(135, 230, 185, 230);
+
+    pdf.save(`${service}_Certificate.pdf`);
+  };
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile | Digital E-Gram Panchayat</title>
+    <link rel="stylesheet" href="../css/profile.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+<h1 class="page-title">Citizen Profile</h1>
+
+<div class="profile-wrapper">
+
+    <!-- Left Profile Card -->
+    <div class="profile-left">
+        <div class="photo-box">
+            <img id="profilePhoto" src="../images/user-placeholder.png" alt="Profile Photo">
+            <label class="upload-btn">
+                <i class="fa-solid fa-camera"></i>
+                <input type="file" hidden>
+            </label>
+        </div>
+
+        <h3 class="username" id="username">Loading...</h3>
+        <span class="role-badge" id="userRole">USER</span>
+    </div>
+
+    <!-- Right Details Card -->
+    <div class="profile-right">
+        <h2>Personal Information</h2>
+
+        <div class="info-row">
+            <i class="fa-solid fa-user"></i>
+            <div>
+                <label>Full Name</label>
+                <p id="fullName">Loading...</p>
+            </div>
+        </div>
+
+        <div class="info-row">
+            <i class="fa-solid fa-envelope"></i>
+            <div>
+                <label>Email</label>
+                <p id="email">Loading...</p>
+            </div>
+        </div>
+
+        <div class="info-row">
+            <i class="fa-solid fa-id-card"></i>
+            <div>
+                <label>User ID</label>
+                <p id="userID">Loading...</p>
+            </div>
+        </div>
+
+        <div class="info-row">
+            <i class="fa-solid fa-location-dot"></i>
+            <div>
+                <label>Village</label>
+                <p id="village">Loading...</p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* AUTH + LOAD USER DATA */
+auth.onAuthStateChanged(user => {
+    if(!user){
+        // Not logged in → redirect
+        window.location = "../login.html";
+        return;
+    }
+
+    // Fetch user data
+    db.collection("users").doc(user.uid).get()
+      .then(doc => {
+          if(!doc.exists || doc.data().role !== "user"){
+              alert("Access Denied!");
+              window.location = "../login.html";
+              return;
+          }
+
+          const data = doc.data();
+          document.getElementById("username").innerText = data.name;
+          document.getElementById("userRole").innerText = data.role.toUpperCase();
+          document.getElementById("fullName").innerText = data.name;
+          document.getElementById("email").innerText = data.email;
+          document.getElementById("userID").innerText = user.uid;
+          document.getElementById("village").innerText = data.village || "Not Provided";
+
+          // If photoURL exists
+          if(data.photoURL){
+              document.getElementById("profilePhoto").src = data.photoURL;
+          }
+      });
+});
+</script>
+
+</body>
+</html>

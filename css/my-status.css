@@ -1,0 +1,50 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+}
+
+.top-header {
+    background: #2c3e50;
+    color: white;
+    padding: 15px 30px;
+}
+
+.status-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 10px;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+.app-card {
+    background: white;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.status.pending {
+    background: #facc15;
+    color: #000;
+}
+
+.status.approved {
+    background: #22c55e;
+    color: white;
+}
+
+.status.rejected {
+    background: #ef4444;
+    color: white;
+}

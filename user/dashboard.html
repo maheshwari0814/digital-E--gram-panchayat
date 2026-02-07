@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard | Digital E-Gram Panchayat</title>
+    <link rel="stylesheet" href="../css/user-dashboard.css">
+</head>
+<body>
+
+    <!-- Top Header -->
+    <header class="top-header">
+        <h1>Digital E-Gram Panchayat</h1>
+        <span>User Dashboard</span>
+    </header>
+
+    <!-- Layout -->
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul>
+               <ul>
+    <li class="active"><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="search-services.html">Search Services</a></li>
+    <li><a href="apply-services.html">Apply Services</a></li>
+    <li><a href="my-status.html">My Application Status</a></li>
+    <li><a href="profile.html">My Profile</a></li>
+    <li class="logout"><a href="../login.html">Logout</a></li>
+</ul>
+
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <h2>Welcome, Citizen</h2>
+            <p class="subtitle">Access Gram Panchayat services digitally and transparently.</p>
+
+            <div class="card-grid">
+                  <a href="search-services.html" class="card-link">
+                <div class="card">
+                    <h3>Search Services</h3>
+                    <p>View available Gram Panchayat services and schemes.</p>
+                </div>
+                </a>
+                 
+                <a href="apply-services.html" class="card-link">
+                <div class="card">
+                    <h3>Apply Services</h3>
+                    <p>Apply online for certificates and welfare schemes.</p>
+                </div>
+                </a>
+
+                <a href="my-status.html" class="card-link">
+                <div class="card">
+                    <h3>My Application Status</h3>
+                    <p>Track the progress of your submitted applications.</p>
+                </div>
+                </a>
+                 
+                <a href="profile.html" class="card-link">
+                <div class="card">
+                    <h3>My Profile</h3>
+                    <p>View and update your personal information.</p>
+                </div>
+                </a>
+            </div>
+        </main>
+
+    </div>
+    <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* Firebase config */
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* USER ACCESS CHECK */
+auth.onAuthStateChanged(user => {
+  if(!user){
+    window.location = "../login.html";
+    return;
+  }
+
+  db.collection("users").doc(user.uid).get().then(doc => {
+    if(!doc.exists || doc.data().role !== "user"){
+      alert("Access denied");
+      window.location = "../login.html";
+    }
+  });
+});
+</script>
+
+</body>
+</html>

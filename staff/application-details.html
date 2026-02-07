@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Application Details</title>
+<link rel="stylesheet" href="../css/staff-details.css">
+</head>
+<body>
+
+<header class="top-header">
+  <h1>Application Details</h1>
+</header>
+
+<div class="details-container" id="details">
+  <p>Loading...</p>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+/* 🔐 Firebase Config (SAME AS LOGIN) */
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* 🔎 Get Application ID */
+const params = new URLSearchParams(window.location.search);
+const appId = params.get("id");
+
+if (!appId) {
+  document.getElementById("details").innerHTML =
+    "<p style='color:red'>Invalid Application ID</p>";
+  throw new Error("No application ID");
+}
+
+/* 🔐 AUTH + ROLE CHECK */
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "../login.html";
+    return;
+  }
+
+  db.collection("users").doc(user.uid).get().then(doc => {
+    if (!doc.exists || !["staff","admin"].includes(doc.data().role)) {
+      alert("Access denied");
+      auth.signOut();
+      window.location.href = "../login.html";
+      return;
+    }
+    loadDetails();
+  });
+});
+
+/* 📄 LOAD APPLICATION DETAILS */
+function loadDetails(){
+  db.collection("applications").doc(appId).get().then(doc => {
+    if (!doc.exists) {
+      document.getElementById("details").innerHTML =
+        "<p>Application not found</p>";
+      return;
+    }
+
+    const d = doc.data();
+
+    document.getElementById("details").innerHTML = `
+      <div class="card">
+        <p><strong>Service:</strong> ${d.service}</p>
+        <p><strong>Name:</strong> ${d.name}</p>
+        <p><strong>Mobile:</strong> ${d.mobile}</p>
+        <p><strong>Address:</strong> ${d.address}</p>
+        <p><strong>Status:</strong>
+          <span class="status ${d.status.toLowerCase()}">${d.status}</span>
+        </p>
+
+        <label>Staff Comment</label>
+        <textarea id="comment">${d.staffComment || ""}</textarea>
+
+        <div class="buttons">
+          <button onclick="saveComment()">Save Comment</button>
+          <button class="approve" onclick="updateStatus('Approved')">Approve</button>
+          <button class="reject" onclick="updateStatus('Rejected')">Reject</button>
+        </div>
+
+        ${d.status === "Approved" ? `
+          <button class="pdf-btn" onclick="downloadPDF(
+            '${d.service}',
+            '${d.name}',
+            '${d.mobile}',
+            '${d.address}'
+          )">Download Certificate</button>
+        ` : ""}
+      </div>
+    `;
+  });
+}
+
+/* 💬 SAVE COMMENT */
+function saveComment(){
+  const comment = document.getElementById("comment").value;
+  db.collection("applications").doc(appId).update({
+    staffComment: comment
+  }).then(() => alert("Comment saved"));
+}
+
+/* ✅ UPDATE STATUS */
+function updateStatus(status){
+  db.collection("applications").doc(appId).update({
+    status: status,
+    approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    approvedBy: auth.currentUser.uid
+  }).then(() => {
+    alert("Status updated");
+    loadDetails();
+  });
+}
+
+/* 📄 GENERATE PDF */
+function downloadPDF(service, name, mobile, address){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  pdf.setFontSize(16);
+  pdf.text("Digital E-Gram Panchayat", 20, 20);
+
+  pdf.setFontSize(12);
+  pdf.text("Official Certificate", 20, 30);
+  pdf.line(20, 35, 190, 35);
+
+  pdf.text(`Service: ${service}`, 20, 50);
+  pdf.text(`Name: ${name}`, 20, 60);
+  pdf.text(`Mobile: ${mobile}`, 20, 70);
+  pdf.text(`Address: ${address}`, 20, 80);
+  pdf.text(`Status: Approved`, 20, 90);
+
+  pdf.text("This certificate is digitally approved.", 20, 120);
+  pdf.text("Authorized Signatory", 20, 140);
+
+  pdf.save(`${service}_Certificate.pdf`);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,89 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    background-color: #eef2f5;
+}
+
+/* Header */
+.header {
+    background-color: #0b5ed7;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 4px solid #084298;
+}
+
+.header h1 {
+    font-size: 32px;
+    margin-bottom: 5px;
+}
+
+/* Main Box */
+.main-box {
+    background-color: #ffffff;
+    width: 60%;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 8px;
+    border: 2px solid #d1d9e0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.main-box h2 {
+    color: #084298;
+    margin-bottom: 15px;
+}
+
+.main-box p {
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+/* Buttons */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn {
+    text-decoration: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.login-btn {
+    background-color: #198754;
+    color: white;
+}
+
+.register-btn {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.85;
+}
+
+/* Footer */
+.footer {
+    background-color: #0b5ed7;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}

@@ -1,0 +1,95 @@
+/* ===== LOGIN PAGE BACKGROUND ===== */
+body {
+    min-height: 100vh;
+    background:
+        linear-gradient(135deg, #0b5ed7 0%, #0d6efd 35%, #e9f2ff 35%, #f8f9fa 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* ===== LOGIN BOX ===== */
+.login-container {
+    background-color: #ffffff;
+    width: 420px;
+    margin: 90px auto;
+    padding: 35px 40px;
+    border-radius: 10px;
+    border-top: 6px solid #0b5ed7;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== LOGIN HEADING ===== */
+.login-container h2 {
+    text-align: center;
+    color: #084298;
+    font-size: 26px;
+    margin-bottom: 6px;
+}
+
+.login-container p {
+    text-align: center;
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+/* ===== INPUT GROUP ===== */
+.input-group {
+    margin-bottom: 18px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #bfc9d9;
+    font-size: 15px;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #0b5ed7;
+    box-shadow: 0 0 0 2px rgba(11, 94, 215, 0.15);
+}
+
+/* ===== LOGIN BUTTON ===== */
+.login-container .login-btn {
+    width: 100%;
+    padding: 13px;
+    background-color: #0b5ed7;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-container .login-btn:hover {
+    background-color: #084298;
+}
+
+/* ===== REGISTER LINK ===== */
+.link-text {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 14px;
+}
+
+.link-text a {
+    color: #0b5ed7;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.link-text a:hover {
+    text-decoration: underline;
+}

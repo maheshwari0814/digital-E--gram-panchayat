@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Apply Services | Digital E-Gram Panchayat</title>
+<link rel="stylesheet" href="../css/apply-services.css">
+</head>
+
+<body>
+
+<header class="top-header">
+    <h1>Digital E-Gram Panchayat</h1>
+    <span>Apply for Gram Panchayat Services</span>
+</header>
+
+<div class="apply-container">
+    <h2>Apply for Service</h2>
+
+    <form id="applyForm">
+
+        <label>Service Type</label>
+        <select id="service" required>
+            <option value="">Select Service</option>
+            <option value="Birth Certificate">Birth Certificate</option>
+            <option value="Income Certificate">Income Certificate</option>
+            <option value="Caste Certificate">Caste Certificate</option>
+            <option value="Residence Certificate">Residence Certificate</option>
+        </select>
+
+        <label>Applicant Name</label>
+        <input type="text" id="name" required>
+
+        <label>Mobile Number</label>
+        <input type="tel" id="mobile" required>
+
+        <label>Address</label>
+        <textarea id="address" required></textarea>
+
+        <button type="submit">Submit Application</button>
+    </form>
+
+    <p id="msg"></p>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* Firebase Config */
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* AUTH CHECK */
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "../login.html";
+  }
+});
+
+/* FORM SUBMIT */
+document.getElementById("applyForm").addEventListener("submit", e => {
+  e.preventDefault();
+
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const service = document.getElementById("service").value;
+  const name = document.getElementById("name").value;
+  const mobile = document.getElementById("mobile").value;
+  const address = document.getElementById("address").value;
+
+  db.collection("applications").add({
+    userId: user.uid,
+    service,
+    name,
+    mobile,
+    address,
+    status: "Pending",
+    appliedAt: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    msg.innerText = "✅ Application submitted successfully";
+    msg.style.color = "green";
+    e.target.reset();
+  })
+  .catch(err => {
+    msg.innerText = err.message;
+    msg.style.color = "red";
+  });
+});
+</script>
+
+</body>
+</html>

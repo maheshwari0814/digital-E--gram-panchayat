@@ -1,0 +1,83 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: #f4f7fb;
+    color: #333;
+}
+
+.top-header {
+    background: #3b2f8f;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.admin-dashboard {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.admin-dashboard h2 {
+    color: #3b2f8f;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #666;
+    margin-bottom: 40px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+}
+
+.stat-card h3 {
+    font-size: 40px;
+    margin: 0;
+}
+
+.stat-card p {
+    margin-top: 10px;
+    color: #666;
+}
+
+.pending h3 {
+    color: #f0ad4e;
+}
+
+.approved h3 {
+    color: #28a745;
+}
+
+.rejected h3 {
+    color: #dc3545;
+}
+
+.logout {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 10px 25px;
+    background: #dc3545;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.logout:hover {
+    background: #b02a37;
+}

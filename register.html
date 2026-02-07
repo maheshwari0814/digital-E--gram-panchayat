@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register | Digital E-Gram Panchayat</title>
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<body class="register-page">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+    authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+    projectId: "digital-e-gram-panchayat-d04a0",
+    storageBucket: "digital-e-gram-panchayat-d04a0.appspot.com",
+    messagingSenderId: "526395749586",
+    appId: "1:526395749586:web:c41ddc68a2e987519e690b"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+
+<div class="register-container">
+    <h2>Create Account</h2>
+    <p>Register to access Gram Panchayat services</p>
+
+    <form id="registerForm">
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" name="name" placeholder="Enter full name" required>
+        </div>
+
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="Enter email" required>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Create password" required>
+        </div>
+
+        <div class="input-group">
+            <label>Select Role</label>
+            <select name="role" required>
+                <option value="">-- Select Role --</option>
+                <option value="user">Citizen (User)</option>
+                <option value="staff">Staff</option>
+                <option value="admin">admin</option>
+            </select>
+        </div>
+
+        <button type="submit" class="register-btn">Register</button>
+
+        <div class="link-text">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+    </form>
+</div>
+
+<!-- Firebase registration JS -->
+<script>
+const registerForm = document.getElementById('registerForm');
+
+registerForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // Get values
+    const name = registerForm['name'].value;
+    const email = registerForm['email'].value;
+    const password = registerForm['password'].value;
+    const role = registerForm['role'].value;
+
+    // Create user in Firebase Auth
+    auth.createUserWithEmailAndPassword(email, password)
+    .then((cred) => {
+        // Save additional info in Firestore
+        return db.collection('users').doc(cred.user.uid).set({
+            name: name,
+            email: email,
+            role: role
+        });
+    })
+    .then(() => {
+        alert("Registration successful!");
+        registerForm.reset();
+        window.location = 'login.html';
+    })
+    .catch((error) => {
+        alert(error.message);
+    });
+});
+</script>
+
+</body>
+</html>

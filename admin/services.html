@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin | Manage Services</title>
+  <link rel="stylesheet" href="../css/admin-services.css">
+</head>
+<body>
+
+<h2>Manage Services</h2>
+
+<!-- ADD SERVICE -->
+<div class="card">
+  <h3>Add New Service</h3>
+  <input type="text" id="serviceName" placeholder="Service Name">
+  <textarea id="serviceDesc" placeholder="Description"></textarea>
+  <input type="number" id="serviceFee" placeholder="Fee">
+  <button onclick="addService()">Add Service</button>
+</div>
+
+<!-- SERVICE LIST -->
+<div id="services"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* 🔐 ADMIN AUTH CHECK */
+auth.onAuthStateChanged(user => {
+  if (!user) location.href = "../login.html";
+
+  db.collection("users").doc(user.uid).get().then(doc => {
+    if (!doc.exists || doc.data().role !== "admin") {
+      alert("Access Denied");
+      auth.signOut();
+      location.href = "../login.html";
+    } else {
+      loadServices();
+    }
+  });
+});
+
+/* ➕ ADD SERVICE */
+function addService() {
+  const name = serviceName.value;
+  const desc = serviceDesc.value;
+  const fee = serviceFee.value;
+
+  if (!name || !desc) return alert("Fill all fields");
+
+  db.collection("services").add({
+    name,
+    description: desc,
+    fee,
+    active: true,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  serviceName.value = "";
+  serviceDesc.value = "";
+  serviceFee.value = "";
+}
+
+/* 📄 LOAD SERVICES */
+function loadServices() {
+  db.collection("services").onSnapshot(snapshot => {
+    services.innerHTML = "";
+    snapshot.forEach(doc => {
+      const s = doc.data();
+      services.innerHTML += `
+        <div class="card">
+          <h4>${s.name}</h4>
+          <p>${s.description}</p>
+          <p>Fee: ₹${s.fee}</p>
+          <button onclick="deleteService('${doc.id}')">Delete</button>
+        </div>
+      `;
+    });
+  });
+}
+
+/* ❌ DELETE SERVICE */
+function deleteService(id) {
+  if (confirm("Delete service?")) {
+    db.collection("services").doc(id).delete();
+  }
+}
+</script>
+
+</body>
+</html>

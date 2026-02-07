@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Staff | View Applications</title>
+<link rel="stylesheet" href="../css/staff-applications.css">
+</head>
+<body>
+
+<header class="top-header">
+    <h1>Staff Dashboard</h1>
+    <span>Manage Applications</span>
+</header>
+
+<div class="container">
+    <h2>All Applications</h2>
+    <div id="applications"></div>
+</div>
+
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* AUTH + ROLE CHECK */
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "../login.html";
+    return;
+  }
+
+  db.collection("users").doc(user.uid).get().then(doc => {
+    if (!doc.exists || doc.data().role !== "staff") {
+      alert("Access Denied");
+      auth.signOut();
+      window.location.href = "../login.html";
+    } else {
+      loadApplications();
+    }
+  });
+});
+
+function loadApplications()
+ {
+  db.collection("applications")
+    .orderBy("appliedAt", "desc")
+    .onSnapshot(snapshot => {
+
+      const container = document.getElementById("applications");
+      container.innerHTML = "";
+
+      if (snapshot.empty) {
+        container.innerHTML = "<p>No applications found</p>";
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        container.innerHTML += `
+          <div class="card">
+            <h3>${data.service}</h3>
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Mobile:</strong> ${data.mobile}</p>
+            <p><strong>Status:</strong>
+              <span class="status ${data.status.toLowerCase()}">
+                ${data.status}
+              </span>
+            </p>
+
+            <div class="actions">
+              <button class="approve" onclick="updateStatus('${doc.id}', 'Approved')">Approve</button>
+              <button class="reject" onclick="updateStatus('${doc.id}', 'Rejected')">Reject</button>
+              <a href="application-details.html?id=${doc.id}" class="view-btn">
+  View Details
+</a>
+
+            </div>
+          </div>
+        `;
+      });
+    });
+}
+
+function updateStatus(id, status) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  db.collection("applications").doc(id).update({
+    status: status,
+    approvedBy: user.uid,
+    approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    console.log(`Application ${id} status updated to ${status}`);
+    // No need to alert – snapshot will update automatically
+  })
+  .catch(err => {
+    console.error("Error updating status:", err.message);
+    alert("Failed to update status: " + err.message);
+  });
+}
+
+</script>
+
+</body>
+</html>

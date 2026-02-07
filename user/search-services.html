@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Services | Digital E-Gram Panchayat</title>
+    <link rel="stylesheet" href="../css/search-services.css">
+</head>
+<body>
+
+<h1 class="page-title">Available Gram Panchayat Services</h1>
+
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search service name...">
+</div>
+
+<div class="services-container" id="servicesList">
+    <!-- Services loaded from Firebase -->
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let servicesData = [];
+
+/* DEFAULT SERVICES (only used if Firebase is empty) */
+const defaultServices = [
+  { name: "Birth Certificate", description: "Apply for official birth certificate" },
+  { name: "Death Certificate", description: "Apply for death certificate" },
+  { name: "Income Certificate", description: "Certificate for income proof" },
+  { name: "Residence Certificate", description: "Proof of residential address" },
+  { name: "Caste Certificate", description: "Apply for caste verification certificate" },
+  { name: "Marriage Certificate", description: "Register marriage under Gram Panchayat" }
+];
+
+/* AUTH + ROLE CHECK */
+auth.onAuthStateChanged(user => {
+  if(!user){
+    window.location = "../login.html";
+    return;
+  }
+
+  db.collection("users").doc(user.uid).get().then(doc => {
+    if(doc.data().role !== "user"){
+      window.location = "../login.html";
+    }
+  });
+
+  loadServices();
+});
+
+/* LOAD SERVICES */
+function loadServices(){
+  db.collection("services").get().then(snapshot => {
+    servicesData = [];
+    const container = document.getElementById("servicesList");
+    container.innerHTML = "";
+
+    if (snapshot.empty) {
+      servicesData = defaultServices;
+      defaultServices.forEach(service => renderService(service));
+      return;
+    }
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      servicesData.push(data);
+      renderService(data);
+    });
+  });
+}
+
+/* RENDER CARD */
+function renderService(service){
+  const container = document.getElementById("servicesList");
+  const div = document.createElement("div");
+  div.className = "service-card";
+  div.innerHTML = `
+    <h3>${service.name}</h3>
+    <p>${service.description}</p>
+  `;
+  container.appendChild(div);
+}
+
+/* SEARCH */
+document.getElementById("searchInput").addEventListener("keyup", function(){
+  const value = this.value.toLowerCase();
+  const container = document.getElementById("servicesList");
+  container.innerHTML = "";
+
+  servicesData
+    .filter(service => service.name.toLowerCase().includes(value))
+    .forEach(service => renderService(service));
+});
+</script>
+
+</body>
+</html>

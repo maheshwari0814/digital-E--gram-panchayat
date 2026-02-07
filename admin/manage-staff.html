@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Manage Staff | Admin Dashboard</title>
+<link rel="stylesheet" href="../css/admin-manage-staff.css">
+</head>
+<body>
+
+<header class="top-header">
+  <h1>Admin Dashboard</h1>
+  <span>Manage Staff Members</span>
+</header>
+
+<div class="container">
+
+  <h2>Add Staff Member</h2>
+  <form id="addStaffForm">
+    <input type="text" id="name" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Add Staff</button>
+  </form>
+
+  <h2>Staff List</h2>
+  <div id="staffList"></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* Firebase Config */
+firebase.initializeApp({
+  apiKey: "AIzaSyCu1LEhKGJx6ol_jailWP-BLvjRBKmQCMU",
+  authDomain: "digital-e-gram-panchayat-d04a0.firebaseapp.com",
+  projectId: "digital-e-gram-panchayat-d04a0"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* AUTH + ROLE CHECK */
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "../login.html";
+    return;
+  }
+
+  db.collection("users").doc(user.uid).get().then(doc => {
+    if (!doc.exists || doc.data().role !== "admin") {
+      alert("Access Denied");
+      auth.signOut();
+      window.location.href = "../login.html";
+      return;
+    }
+    loadStaff();
+  });
+});
+
+/* ADD STAFF */
+document.getElementById("addStaffForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    await db.collection("users").doc(cred.user.uid).set({
+      name: name,
+      email: email,
+      role: "staff",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert("Staff added successfully");
+    e.target.reset();
+    loadStaff();
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+/* LOAD STAFF LIST */
+function loadStaff() {
+  db.collection("users")
+    .where("role", "==", "staff")
+    .onSnapshot(snapshot => {
+      const list = document.getElementById("staffList");
+      list.innerHTML = "";
+      if(snapshot.empty){
+        list.innerHTML = "<p>No staff found.</p>";
+        return;
+      }
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        list.innerHTML += `
+          <div class="staff-card">
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <button onclick="deleteStaff('${doc.id}')">Delete</button>
+          </div>
+        `;
+      });
+    });
+}
+
+/* DELETE STAFF */
+function deleteStaff(id) {
+  if(confirm("Are you sure you want to remove this staff member?")){
+    db.collection("users").doc(id).delete()
+    .then(() => alert("Staff deleted"))
+    .catch(err => alert(err.message));
+  }
+}
+</script>
+
+</body>
+</html>
